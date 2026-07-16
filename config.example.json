@@ -1,0 +1,9 @@
+{
+  "login_url": "https://matricula.utp.ac.pa/mprematr/menu/inicio/2026/OnhReSgXXkhQmbcaXlQghWhR$Ocd",
+  "cedula": "TU_CEDULA_AQUI",
+  "password": "TU_CONTRASEÑA_AQUI",
+  "indice_selector": "",
+  "headless": true,
+  "telegram_bot_token": "TU_TOKEN_DE_BOTFATHER",
+  "telegram_chat_id": "TU_CHAT_ID"
+}
