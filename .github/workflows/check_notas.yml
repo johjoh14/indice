@@ -1,0 +1,52 @@
+name: Revisar Indice UTP
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}   # permite correrlo manualmente desde la pestaña "Actions"
+
+permissions:
+  contents: write   # necesario para poder guardar state.json de vuelta al repo
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependencias
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Revisar el índice y avisar por Telegram
+        env:
+          UTP_CEDULA: ${{ secrets.UTP_CEDULA }}
+          UTP_PASSWORD: ${{ secrets.UTP_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python check_notas.py
+
+      - name: Subir captura de pantalla (solo para depurar si algo falla)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ultima_captura
+          path: ultima_captura.png
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Guardar el estado para no repetir avisos
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "Actualizar estado del indice [skip ci]"
+          git push
+        continue-on-error: true
